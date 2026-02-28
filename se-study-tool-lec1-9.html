@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intro to SE — Complete Study Tool (Lec 1–9)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #f5c518;
+    --gold-dim: #b8921a;
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #2a2a38;
+    --text: #e8e8f0;
+    --text-dim: #888899;
+    --easy: #4ade80;
+    --medium: #fb923c;
+    --hard: #f87171;
+    --accent: #818cf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
+
+  .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* HEADER */
+  header { border-bottom: 1px solid var(--border); padding: 20px 0 14px; position: sticky; top: 0; background: rgba(10,10,15,0.95); backdrop-filter: blur(12px); z-index: 100; }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .logo-block { display: flex; align-items: baseline; gap: 10px; }
+  .lec-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: var(--gold); background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.25); padding: 3px 10px; border-radius: 4px; white-space: nowrap; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: clamp(16px, 2.5vw, 22px); font-weight: 700; color: var(--text); }
+  .header-title span { color: var(--gold); }
+  .tab-bar { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; padding: 7px 16px; border-radius: 6px; border: 1px solid transparent; cursor: pointer; transition: all 0.18s; background: transparent; color: var(--text-dim); }
+  .tab:hover { background: var(--surface2); color: var(--text); }
+  .tab.active { background: var(--gold); color: #0a0a0f; border-color: var(--gold); }
+
+  /* VIEWS */
+  .view { display: none; padding: 36px 0 80px; }
+  .view.active { display: block; }
+
+  /* SECTION LABEL */
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; color: var(--text-dim); text-transform: uppercase; display: flex; align-items: center; gap: 12px; margin: 36px 0 20px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-label:first-child { margin-top: 0; }
+
+  /* OVERVIEW - LECTURE SELECTOR */
+  .lec-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+  .lec-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+  .lec-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .lec-btn.active { background: var(--gold); color: #0a0a0f; border-color: var(--gold); }
+
+  /* SUMMARY CARDS */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 32px; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 26px; position: relative; overflow: hidden; transition: border-color 0.2s; }
+  .summary-card:hover { border-color: rgba(245,197,24,0.4); }
+  .summary-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+  .summary-card.accent-purple::before { background: var(--accent); }
+  .summary-card.accent-green::before { background: var(--easy); }
+  .summary-card.accent-orange::before { background: var(--medium); }
+  .summary-card.accent-red::before { background: var(--hard); }
+  .card-num { font-family: 'Playfair Display', serif; font-size: 44px; font-weight: 900; color: var(--gold); opacity: 0.12; position: absolute; right: 16px; top: 8px; line-height: 1; }
+  .card-topic { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
+  .accent-purple .card-topic { color: var(--accent); }
+  .accent-green .card-topic { color: var(--easy); }
+  .accent-orange .card-topic { color: var(--medium); }
+  .accent-red .card-topic { color: var(--hard); }
+  .card-heading { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+  .card-body { font-size: 13px; line-height: 1.75; color: var(--text-dim); }
+  .card-body strong { color: var(--text); font-weight: 600; }
+  .card-body code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: rgba(245,197,24,0.08); color: var(--gold); padding: 1px 5px; border-radius: 3px; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 20px; border: 1px solid; }
+  .tag.gold { color: var(--gold); border-color: rgba(245,197,24,0.3); background: rgba(245,197,24,0.07); }
+  .tag.purple { color: var(--accent); border-color: rgba(129,140,248,0.3); background: rgba(129,140,248,0.07); }
+  .tag.green { color: var(--easy); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.07); }
+  .tag.orange { color: var(--medium); border-color: rgba(251,146,60,0.3); background: rgba(251,146,60,0.07); }
+  .tag.red { color: var(--hard); border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
+
+  /* TOPIC OVERVIEW PANEL */
+  .lec-panel { display: none; }
+  .lec-panel.active { display: block; }
+
+  /* CODE BLOCK IN OVERVIEW */
+  .code-sample { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--text-dim); overflow-x: auto; margin-top: 10px; }
+  .code-sample .kw { color: var(--accent); }
+  .code-sample .cl { color: var(--gold); }
+  .code-sample .cm { color: rgba(136,136,153,0.55); font-style: italic; }
+  .code-sample .st { color: var(--easy); }
+
+  /* TABLE IN OVERVIEW */
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ref-table th { text-align: left; padding: 10px 16px; background: rgba(245,197,24,0.06); color: var(--gold); font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
+  .ref-table td { padding: 10px 16px; border-bottom: 1px solid rgba(42,42,56,0.5); color: var(--text-dim); font-size: 13px; line-height: 1.5; }
+  .ref-table td:first-child { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--gold); }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+
+  /* DB TABLE EXAMPLES */
+  .tables-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 640px) { .tables-row { grid-template-columns: 1fr; } }
+  .table-demo { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .table-header-row { padding: 12px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: 0.08em; }
+  .table-demo table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .table-demo th { text-align: left; padding: 8px 16px; background: rgba(245,197,24,0.04); color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+  .table-demo td { padding: 8px 16px; border-bottom: 1px solid rgba(42,42,56,0.5); font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); }
+  .table-demo tr:last-child td { border-bottom: none; }
+  .pk { color: var(--gold) !important; font-weight: 600; }
+  .fk { color: var(--accent) !important; font-weight: 600; }
+
+  /* FLASHCARD VIEW */
+  .fc-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .fc-counter { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .fc-counter span { color: var(--gold); font-weight: 600; }
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.active { background: var(--gold); color: #0a0a0f; border-color: var(--gold); }
+
+  .card-scene { perspective: 1400px; width: 100%; max-width: 760px; margin: 0 auto; height: 320px; cursor: pointer; }
+  .card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 16px; padding: 32px 36px; display: flex; flex-direction: column; justify-content: center; }
+  .card-front { background: var(--surface); border: 1px solid var(--border); background-image: radial-gradient(circle at 80% 20%, rgba(245,197,24,0.05) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(129,140,248,0.05) 0%, transparent 50%); }
+  .card-back { background: var(--surface2); border: 1px solid rgba(245,197,24,0.25); transform: rotateY(180deg); background-image: radial-gradient(circle at 20% 20%, rgba(245,197,24,0.07) 0%, transparent 50%); }
+  .card-category { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+  .card-q { font-family: 'Playfair Display', serif; font-size: clamp(17px, 2.5vw, 22px); font-weight: 700; line-height: 1.35; color: var(--text); flex: 1; display: flex; align-items: center; }
+  .card-hint { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 12px; opacity: 0.6; }
+  .card-flip-prompt { position: absolute; bottom: 18px; right: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim); opacity: 0.45; }
+  .card-a { font-size: 13.5px; line-height: 1.75; color: var(--text); overflow-y: auto; max-height: 230px; }
+  .card-a strong { color: var(--gold); }
+  .card-a code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: rgba(245,197,24,0.08); color: var(--gold); padding: 1px 5px; border-radius: 3px; }
+  .card-a ul { padding-left: 16px; } .card-a li { margin-bottom: 5px; }
+  .card-back-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+
+  .progress-bar-wrap { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin: 16px auto 0; max-width: 760px; }
+  .progress-bar-fill { height: 100%; background: var(--gold); border-radius: 99px; transition: width 0.3s ease; }
+  .nav-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 24px; }
+  .nav-btn { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 11px 26px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.15s; }
+  .nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .nav-btn.primary { background: var(--gold); color: #0a0a0f; border-color: var(--gold); }
+  .nav-btn.primary:hover { background: #e6b800; }
+
+  /* QUIZ VIEW */
+  .quiz-setup { text-align: center; padding: 60px 0; }
+  .quiz-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 900; margin-bottom: 12px; }
+  .quiz-subtitle { font-size: 15px; color: var(--text-dim); margin-bottom: 12px; }
+  .quiz-lec-filter { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px; }
+  .start-btn { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; padding: 16px 40px; border-radius: 8px; background: var(--gold); color: #0a0a0f; border: none; cursor: pointer; letter-spacing: 0.06em; transition: background 0.15s; }
+  .start-btn:hover { background: #e6b800; }
+  .quiz-question-block { display: none; max-width: 680px; margin: 0 auto; }
+  .quiz-question-block.active { display: block; }
+  .quiz-q-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: var(--text-dim); margin-bottom: 8px; }
+  .quiz-q { font-family: 'Playfair Display', serif; font-size: clamp(17px, 2.5vw, 21px); font-weight: 700; margin-bottom: 24px; line-height: 1.4; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .quiz-option { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; font-size: 14px; cursor: pointer; transition: all 0.15s; text-align: left; color: var(--text); font-family: 'IBM Plex Sans', sans-serif; display: flex; align-items: flex-start; gap: 10px; }
+  .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: rgba(245,197,24,0.04); }
+  .quiz-option.correct { border-color: var(--easy); background: rgba(74,222,128,0.08); color: var(--easy); }
+  .quiz-option.wrong { border-color: var(--hard); background: rgba(248,113,113,0.08); color: var(--hard); }
+  .quiz-option.disabled { cursor: default; }
+  .opt-letter { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; min-width: 22px; height: 22px; border-radius: 4px; background: var(--surface2); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); flex-shrink: 0; }
+  .quiz-explanation { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 8px; padding: 14px 18px; font-size: 13.5px; line-height: 1.7; color: var(--text-dim); display: none; margin-bottom: 16px; }
+  .quiz-explanation strong { color: var(--gold); }
+  .quiz-next-btn { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 11px 26px; border-radius: 8px; background: var(--gold); color: #0a0a0f; border: none; cursor: pointer; display: none; }
+  .quiz-result { text-align: center; padding: 60px 20px; display: none; }
+  .score-big { font-family: 'Playfair Display', serif; font-size: 80px; font-weight: 900; color: var(--gold); line-height: 1; margin-bottom: 8px; }
+  .score-label { font-size: 17px; color: var(--text-dim); margin-bottom: 32px; }
+
+  /* CHEAT SHEET */
+  .cheatsheet { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .cs-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .cs-header { padding: 13px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+  .cs-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .cs-dot.purple { background: var(--accent); }
+  .cs-dot.green { background: var(--easy); }
+  .cs-dot.orange { background: var(--medium); }
+  .cs-dot.red { background: var(--hard); }
+  .cs-body { padding: 16px 18px; font-size: 13px; line-height: 1.8; color: var(--text-dim); }
+  .cs-body strong { color: var(--text); display: block; margin-bottom: 1px; margin-top: 10px; font-size: 12.5px; }
+  .cs-body strong:first-child { margin-top: 0; }
+  .cs-body code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: rgba(245,197,24,0.08); color: var(--gold); padding: 1px 5px; border-radius: 3px; }
+  .cs-body ul { padding-left: 16px; }
+  .cs-body li { margin-bottom: 4px; }
+  .vs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .vs-col { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .vs-col-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.08em; }
+  .vs-col-title.gold { color: var(--gold); }
+  .vs-col-title.purple { color: var(--accent); }
+  .vs-col ul { padding-left: 14px; font-size: 12px; }
+  .vs-col li { margin-bottom: 4px; color: var(--text-dim); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .cheatsheet { grid-template-columns: 1fr; }
+    .card-scene { height: 280px; }
+    .lec-selector { gap: 5px; }
+    .lec-btn { font-size: 10px; padding: 5px 10px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo-block">
+        <span class="lec-tag">LEC 1–9</span>
+        <span class="header-title">Intro to <span>Software Engineering</span></span>
+      </div>
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchView('overview',this)">Overview</button>
+        <button class="tab" onclick="switchView('flashcards',this)">Flashcards</button>
+        <button class="tab" onclick="switchView('quiz',this)">Quiz</button>
+        <button class="tab" onclick="switchView('cheatsheet',this)">Cheat Sheet</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- OVERVIEW VIEW -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-overview" class="view active">
+<div class="container">
+
+  <div class="section-label" style="margin-top:0">Select Lecture</div>
+  <div class="lec-selector">
+    <button class="lec-btn active" onclick="showLec('lec1',this)">Lec 1 · Intro to SE</button>
+    <button class="lec-btn" onclick="showLec('lec2',this)">Lec 2 · Requirements</button>
+    <button class="lec-btn" onclick="showLec('lec3',this)">Lec 3 · Methodologies</button>
+    <button class="lec-btn" onclick="showLec('lec4',this)">Lec 4 · UML</button>
+    <button class="lec-btn" onclick="showLec('lec5',this)">Lec 5 · Python Basics</button>
+    <button class="lec-btn" onclick="showLec('lec6',this)">Lec 6 · OOP</button>
+    <button class="lec-btn" onclick="showLec('lec7',this)">Lec 7 · Inheritance</button>
+    <button class="lec-btn" onclick="showLec('lec8',this)">Lec 8 · Database</button>
+    <button class="lec-btn" onclick="showLec('lec9',this)">Lec 9 · HTML &amp; CSS</button>
+  </div>
+
+  <!-- LEC 1 -->
+  <div class="lec-panel active" id="lec1">
+    <div class="section-label">Lecture 1 — Introduction to Software Engineering</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">Definition</div><div class="card-heading">Software Engineering</div><div class="card-body">A <strong>disciplined approach</strong> for the development and maintenance of computer software using engineering principles to design, build, test, and maintain software systems.<br><br>Goal: deliver <strong>high-quality, efficient, user-focused</strong> software within time and cost constraints.</div><div class="tag-row"><span class="tag gold">Quality</span><span class="tag gold">Efficiency</span><span class="tag gold">User-Focused</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Core Process</div><div class="card-heading">SDLC</div><div class="card-body">The <strong>Software Development Life Cycle</strong> is a structured process for planning, creating, testing, and deploying software.<br><br><strong>5 Phases:</strong><br>Maintenance → Requirements → Design → Implementation → Verification (cyclical)</div><div class="tag-row"><span class="tag purple">5 Phases</span><span class="tag purple">Cyclical</span><span class="tag purple">Structured</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Requirements</div><div class="card-heading">User Stories</div><div class="card-body">Short descriptions of a feature from the user's perspective.<br><br>Format: <strong>"As a [user], I want [goal] so that [reason]."</strong><br><br>Paired with <strong>Acceptance Criteria</strong> (Given / When / Then) to define when a story is complete.</div><div class="tag-row"><span class="tag green">Given/When/Then</span><span class="tag green">User-Centric</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Core Practices</div><div class="card-heading">3 Key Practices</div><div class="card-body"><strong>1. Iterative Development</strong> — build in repeated cycles<br><strong>2. Automated Testing</strong> — verify quality continuously<br><strong>3. Version Control</strong> — track and manage code changes</div><div class="tag-row"><span class="tag orange">Iterative</span><span class="tag orange">Testing</span><span class="tag orange">Version Control</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 2 -->
+  <div class="lec-panel" id="lec2">
+    <div class="section-label">Lecture 2 — Requirements Engineering</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">Requirements</div><div class="card-heading">Functional vs Non-Functional</div><div class="card-body"><strong>Functional:</strong> What the software DOES — observable behavior, features. Results are reproducible.<br><br><strong>Non-Functional:</strong> How WELL it works — performance, security, scalability, load. Results may not be perfectly reproducible.</div><div class="tag-row"><span class="tag gold">What = Functional</span><span class="tag purple">How Well = Non-Functional</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Quality Checklist</div><div class="card-heading">INVEST</div><div class="card-body"><strong>I</strong>ndependent — self-contained, any order<br><strong>N</strong>egotiable — define what, not how<br><strong>V</strong>aluable — product owner's need<br><strong>E</strong>stimable — can be sized (S/M/L/XL)<br><strong>S</strong>mall — short to code and read<br><strong>T</strong>estable — acceptance criteria cover all scenarios</div><div class="tag-row"><span class="tag purple">Story Quality</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Elicitation</div><div class="card-heading">10 Techniques</div><div class="card-body">Brainstorming, Document Analysis, Focus Groups, Interface Analysis, Interviews, Observation, Process Modeling, Prototyping, Requirement Workshops, Surveys/Questionnaires</div><div class="tag-row"><span class="tag green">10 Techniques</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Acceptance Criteria</div><div class="card-heading">Gherkin Format</div><div class="card-body"><strong>Given</strong> — setup / preconditions<br><strong>When</strong> — the action or event<br><strong>Then</strong> — the expected result<br><br>Structured format makes criteria unambiguous and testable by any stakeholder.</div><div class="tag-row"><span class="tag orange">Unambiguous</span><span class="tag orange">Testable</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 3 -->
+  <div class="lec-panel" id="lec3">
+    <div class="section-label">Lecture 3 — Software Development Methodologies</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">Methodology</div><div class="card-heading">Waterfall</div><div class="card-body">A <strong>linear, sequential</strong> model: Requirements → Design → Implementation → Verification → Maintenance.<br><br>Each phase must be <strong>fully complete</strong> before the next begins.<br><br><strong>Use when:</strong> requirements are stable, small project, hardware-tied systems.</div><div class="tag-row"><span class="tag gold">Linear</span><span class="tag gold">Sequential</span><span class="tag gold">Stable Reqs</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Methodology</div><div class="card-heading">Agile</div><div class="card-body">Iterative, collaborative, flexible. Created in 2001.<br><br><strong>4 Values:</strong> Individuals over Processes · Working Software over Documentation · Customer Collaboration over Contract · Responding to Change over Following a Plan</div><div class="tag-row"><span class="tag purple">Iterative</span><span class="tag purple">2001</span><span class="tag purple">4 Values</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Framework</div><div class="card-heading">SCRUM</div><div class="card-body"><strong>3 Roles:</strong> Product Owner, Scrum Master, Dev Team<br><strong>3 Artifacts:</strong> Product Backlog, Sprint Backlog, Product Increment<br><strong>5 Events:</strong> Sprint, Backlog Refinement, Daily Scrum, Sprint Review, Sprint Retrospective</div><div class="tag-row"><span class="tag green">3 Roles</span><span class="tag green">3 Artifacts</span><span class="tag green">5 Events</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">SCRUM</div><div class="card-heading">Backlog Grooming</div><div class="card-body">4 key questions: Is the <strong>what</strong> clear? Is the <strong>why</strong> clear? Does it <strong>add value</strong>? Can it be <strong>split</strong>?<br><br>Grooming takes ~5–10% of total sprint time.</div><div class="tag-row"><span class="tag orange">5-10% Sprint Time</span><span class="tag orange">4 Questions</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 4 -->
+  <div class="lec-panel" id="lec4">
+    <div class="section-label">Lecture 4 — UML Class Diagrams</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">UML Types</div><div class="card-heading">Structural vs Behavioral</div><div class="card-body"><strong>Structural</strong> — static structure: Class, Component, Object Diagrams (LLD)<br><strong>Behavioral</strong> — dynamic behavior: State Machine, Use Case, Sequence, Activity Diagrams (HLD)</div><div class="tag-row"><span class="tag gold">LLD = Class Diagrams</span><span class="tag purple">HLD = State/UI/DB</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Class Box</div><div class="card-heading">3 Sections & Scope Symbols</div><div class="card-body"><strong>Sections:</strong> Class Name | Attributes | Methods<br><br><strong>Scope:</strong> <code>+</code> Public · <code>#</code> Protected · <code>(none)</code> Default · <code>−</code> Private<br><br><strong>Method format:</strong> +methodName(param: Type): ReturnType</div><div class="tag-row"><span class="tag purple">+ Public</span><span class="tag purple"># Protected</span><span class="tag purple">- Private</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Connectors</div><div class="card-heading">5 Relationship Types</div><div class="card-body"><strong>→ Association</strong> — communicates with<br><strong>◇ Aggregation</strong> — logically part of (parts can be shared)<br><strong>◆ Composition</strong> — physically part of (parts belong to one)<br><strong>▷ Generalization</strong> — inheritance (is-a)<br><strong>--▷ Realization</strong> — implements interface</div><div class="tag-row"><span class="tag green">5 Types</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Multiplicity</div><div class="card-heading">Notation</div><div class="card-body"><code>*</code> = zero to many · <code>1..*</code> = one to many · <code>0..1</code> = zero or one · <code>2</code> = exactly two<br><br><strong>Stereotype:</strong> written in &lt;&lt;double angle brackets&gt;&gt;, e.g. &lt;&lt;Interface&gt;&gt;, &lt;&lt;Property&gt;&gt;</div><div class="tag-row"><span class="tag orange">Multiplicity</span><span class="tag orange">&lt;&lt;Stereotype&gt;&gt;</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 5 -->
+  <div class="lec-panel" id="lec5">
+    <div class="section-label">Lecture 5 — Introduction to Python</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">Data Types</div><div class="card-heading">5 Type Categories</div><div class="card-body"><strong>Numeric:</strong> int, float, complex<br><strong>Boolean:</strong> bool (True, False)<br><strong>Sequence:</strong> str, list, tuple<br><strong>Set:</strong> set, frozenset<br><strong>Mapping:</strong> dict</div><div class="tag-row"><span class="tag gold">5 Categories</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Collections</div><div class="card-heading">List vs Tuple vs Dict</div><div class="card-body"><strong>List [ ]</strong> — ordered, mutable<br><strong>Tuple ( )</strong> — ordered, immutable<br><strong>Dict { }</strong> — key-value pairs, unordered, mutable<br><br><strong>Negative indexing:</strong> -1 = last, -2 = second-to-last</div><div class="tag-row"><span class="tag purple">List = Mutable</span><span class="tag purple">Tuple = Immutable</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Control Flow</div><div class="card-heading">Loops &amp; Conditionals</div><div class="card-body"><strong>range(start, stop, step)</strong> — stop is exclusive<br><strong>for i in range(n):</strong> — iterate n times<br><strong>while condition:</strong> — must update loop var!<br><strong>if / elif / else</strong> — standard branching<br><br>Python uses <strong>indentation</strong> instead of { }</div><div class="tag-row"><span class="tag green">Indentation-Based</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Dict Methods</div><div class="card-heading">Key Dictionary Operations</div><div class="card-body"><code>keys()</code> all keys · <code>values()</code> all values · <code>items()</code> key-value pairs · <code>get(key)</code> safe retrieval (returns None if missing) · <code>get(key, default)</code> · <code>pop(key)</code> remove & return</div><div class="tag-row"><span class="tag orange">SDLC: Implementation Phase</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 6 -->
+  <div class="lec-panel" id="lec6">
+    <div class="section-label">Lecture 6 — Python Classes and Objects</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">OOP Basics</div><div class="card-heading">Class vs Object</div><div class="card-body">A <strong>class</strong> is a blueprint/template for creating objects.<br>An <strong>object</strong> is an instance of a class — a specific realization with its own attribute values.<br><br><strong>4 OOP Benefits:</strong> Encapsulation, Reusability, Abstraction, Inheritance</div><div class="tag-row"><span class="tag gold">Blueprint</span><span class="tag gold">Instance</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Magic Methods</div><div class="card-heading">__init__ &amp; __str__</div><div class="card-body"><strong>__init__(self, ...)</strong> — constructor; called automatically when object is created; initializes attributes<br><br><strong>__str__(self)</strong> — called automatically on print(object); returns a human-readable string</div><div class="tag-row"><span class="tag purple">Auto-Called</span><span class="tag purple">Dunder Methods</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Syntax</div><div class="card-heading">Class Definition Pattern</div><div class="card-body"><code class="code-sample" style="display:block;margin-top:8px;font-size:11px;padding:12px">class ClassName:<br>  def __init__(self, attr):<br>    self.attr = attr<br>  def method(self):<br>    pass<br><br>obj = ClassName(val)<br>obj.method()</code></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Error Handling</div><div class="card-heading">try / except / finally</div><div class="card-body"><strong>try:</strong> code that may raise an exception<br><strong>except ExceptionType:</strong> handles it<br><strong>finally:</strong> always runs regardless<br><br><code>self</code> = first parameter of every instance method; refers to the current object</div><div class="tag-row"><span class="tag orange">Error Handling</span><span class="tag orange">self = current instance</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 7 -->
+  <div class="lec-panel" id="lec7">
+    <div class="section-label">Lecture 7 — Magic Methods, Inheritance &amp; Interface</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">Inheritance</div><div class="card-heading">Single &amp; Multiple</div><div class="card-body"><strong>Single:</strong> one child inherits from one parent<br><strong>Multiple:</strong> one child inherits from multiple parents<br><br>Syntax: <code>class Child(Parent):</code><br>Child gets all parent methods automatically and can add its own.</div><div class="tag-row"><span class="tag gold">is-a relationship</span><span class="tag gold">class Child(Parent)</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Interface</div><div class="card-heading">Abstract Base Classes</div><div class="card-body">Python uses ABC (Abstract Base Classes) to enforce interface contracts.<br><br><code>from abc import ABC, abstractmethod</code><br><br>Subclasses MUST implement all @abstractmethod methods — otherwise a <strong>TypeError</strong> is raised on instantiation.</div><div class="tag-row"><span class="tag purple">ABC Module</span><span class="tag purple">@abstractmethod</span><span class="tag purple">TypeError if not implemented</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">UML</div><div class="card-heading">Inheritance vs Realization</div><div class="card-body"><strong>Inheritance (Generalization):</strong> solid line with hollow triangle ▷ pointing to parent<br><br><strong>Interface (Realization):</strong> dashed line with hollow triangle --▷ pointing to interface</div><div class="tag-row"><span class="tag green">▷ = Inheritance</span><span class="tag green">--▷ = Implements</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Pattern</div><div class="card-heading">Interface Example (Shape)</div><div class="card-body">Shape (ABC) defines <strong>contract</strong>: all shapes must implement <code>getArea():double</code>.<br><br>Rectangle and Triangle provide concrete implementations.<br>This enforces consistent interface across all subclasses.</div><div class="tag-row"><span class="tag orange">Contract Pattern</span><span class="tag orange">Polymorphism</span></div></div>
+    </div>
+  </div>
+
+  <!-- LEC 8 -->
+  <div class="lec-panel" id="lec8">
+    <div class="section-label">Lecture 8 — Software Design &amp; Databases</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">Design Principle</div><div class="card-heading">Cohesion vs Coupling</div><div class="card-body"><div class="vs-row"><div class="vs-col"><div class="vs-col-title gold">Cohesion</div><ul><li>Focus of ONE module</li><li>Single purpose</li><li>Uniform interface</li><li><strong>HIGH</strong> = good</li></ul></div><div class="vs-col"><div class="vs-col-title purple">Coupling</div><ul><li>Between-module dep.</li><li>Degree of interaction</li><li>Hard to change solo</li><li><strong>LOW</strong> = good</li></ul></div></div></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">Abstraction</div><div class="card-heading">Hierarchy</div><div class="card-body">Moving <strong>up</strong> = abstracting (more general). Moving <strong>down</strong> = refining (more specific).<br><br>automobile → car → sports car → Chevy Corvette → 1976 Stingray<br><br>"car is a <strong>refinement</strong> of automobile"</div><div class="tag-row"><span class="tag purple">Up = Abstract</span><span class="tag purple">Down = Refined</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">Database</div><div class="card-heading">Tables, PK, FK</div><div class="card-body">Relational DB = <strong>tables</strong> (rows + columns).<br><strong>PK</strong> uniquely identifies each row — duplicates cause exception.<br><strong>FK</strong> is a column holding PK of another table, linking tables.</div><div class="tag-row"><span class="tag green">PK = Unique per row</span><span class="tag green">FK = Links tables</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">Relationships</div><div class="card-heading">M:1 and M:M</div><div class="card-body"><strong>Many-to-One:</strong> FK on the "many" side<br><strong>Many-to-Many:</strong> Requires a <strong>junction table</strong> (two FKs, own PK)<br><br><strong>ORM</strong> = Object-Relational Mapping (code instead of SQL). Examples: Django ORM, SQLAlchemy, Hibernate</div><div class="tag-row"><span class="tag orange">Junction Table</span><span class="tag orange">ORM</span></div></div>
+    </div>
+    <div class="section-label">Table Example — Owner / Pet (One-to-Many)</div>
+    <div class="tables-row">
+      <div class="table-demo"><div class="table-header-row">TABLE: owner</div><table><tr><th>id &lt;pk&gt;</th><th>name</th><th>val</th></tr><tr><td class="pk">12</td><td>Tom</td><td>17</td></tr><tr><td class="pk">16</td><td>Ursula</td><td>28</td></tr><tr><td class="pk">56</td><td>Vince</td><td>-5</td></tr></table></div>
+      <div class="table-demo"><div class="table-header-row">TABLE: pet</div><table><tr><th>id &lt;pk&gt;</th><th>name</th><th>owner &lt;fk:owner&gt;</th></tr><tr><td class="pk">1</td><td>Spot</td><td class="fk">12</td></tr><tr><td class="pk">2</td><td>Fido</td><td class="fk">12</td></tr><tr><td class="pk">3</td><td>Jasper</td><td class="fk">16</td></tr></table></div>
+    </div>
+  </div>
+
+  <!-- LEC 9 -->
+  <div class="lec-panel" id="lec9">
+    <div class="section-label">Lecture 9 — HTML &amp; CSS</div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="card-num">01</div><div class="card-topic">HTML</div><div class="card-heading">Web Page Structure</div><div class="card-body"><code>&lt;html&gt;</code> — root element<br><code>&lt;head&gt;</code> — meta-info, not displayed (title, links)<br><code>&lt;body&gt;</code> — visible page content<br><br>HTML is structured as a <strong>Document Tree (DOM)</strong> — parent/child element relationships.</div><div class="tag-row"><span class="tag gold">DOM Tree</span><span class="tag gold">head = meta</span><span class="tag gold">body = content</span></div></div>
+      <div class="summary-card accent-purple"><div class="card-num">02</div><div class="card-topic">HTML</div><div class="card-heading">Common Elements</div><div class="card-body"><code>&lt;h1&gt;–&lt;h6&gt;</code> Headings · <code>&lt;p&gt;</code> Paragraph · <code>&lt;a href=""&gt;</code> Hyperlink · <code>&lt;img src="" alt=""&gt;</code> Image · <code>&lt;ul&gt;/&lt;ol&gt;/&lt;li&gt;</code> Lists · <code>&lt;table&gt;/&lt;tr&gt;/&lt;td&gt;</code> Tables · <code>&lt;form&gt;</code> Input form</div><div class="tag-row"><span class="tag purple">Semantic Tags</span></div></div>
+      <div class="summary-card accent-green"><div class="card-num">03</div><div class="card-topic">CSS</div><div class="card-heading">3 Types of CSS</div><div class="card-body"><strong>Inline:</strong> <code>&lt;p style="color:blue;"&gt;</code><br><strong>Internal:</strong> <code>&lt;style&gt;</code> block in <code>&lt;head&gt;</code><br><strong>External:</strong> separate file linked via <code>&lt;link rel="stylesheet" href="..."&gt;</code><br><br>CSS = Cascading Style Sheets; controls colors, fonts, spacing, positioning, animations.</div><div class="tag-row"><span class="tag green">Inline</span><span class="tag green">Internal</span><span class="tag green">External</span></div></div>
+      <div class="summary-card accent-orange"><div class="card-num">04</div><div class="card-topic">CSS</div><div class="card-heading">Selectors</div><div class="card-body"><strong>Element:</strong> <code>p { }</code> — targets all &lt;p&gt;<br><strong>Class:</strong> <code>.myClass { }</code> — targets class="myClass"<br><strong>ID:</strong> <code>#myId { }</code> — targets id="myId" (unique)<br><strong>Grouping:</strong> <code>h1, h2, p { }</code> — multiple elements<br><br>Syntax: <code>selector { property: value; }</code></div><div class="tag-row"><span class="tag orange">Element · Class · ID</span></div></div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+</div><!-- end overview view -->
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- FLASHCARDS VIEW -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-flashcards" class="view">
+<div class="container">
+  <div class="fc-controls">
+    <div class="fc-counter">Card <span id="fc-cur">1</span> of <span id="fc-total">0</span></div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterCards('all',this)">All</button>
+      <button class="filter-btn" onclick="filterCards('lec1',this)">Lec 1</button>
+      <button class="filter-btn" onclick="filterCards('lec2',this)">Lec 2</button>
+      <button class="filter-btn" onclick="filterCards('lec3',this)">Lec 3</button>
+      <button class="filter-btn" onclick="filterCards('lec4',this)">Lec 4</button>
+      <button class="filter-btn" onclick="filterCards('lec5',this)">Lec 5</button>
+      <button class="filter-btn" onclick="filterCards('lec6',this)">Lec 6</button>
+      <button class="filter-btn" onclick="filterCards('lec7',this)">Lec 7</button>
+      <button class="filter-btn" onclick="filterCards('lec8',this)">Lec 8</button>
+      <button class="filter-btn" onclick="filterCards('lec9',this)">Lec 9</button>
+    </div>
+  </div>
+  <div class="card-scene" onclick="flipCard()">
+    <div class="card-inner" id="card-inner">
+      <div class="card-face card-front">
+        <div class="card-category" id="fc-category"></div>
+        <div class="card-q" id="fc-question"></div>
+        <div class="card-hint" id="fc-hint"></div>
+        <div class="card-flip-prompt">↕ click to reveal</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-back-label">Answer</div>
+        <div class="card-a" id="fc-answer"></div>
+      </div>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fc-progress"></div></div>
+  <div class="nav-row">
+    <button class="nav-btn" onclick="prevCard()">← Prev</button>
+    <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+    <button class="nav-btn" onclick="shuffleCards()" style="margin-left:4px">⇄ Shuffle</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- QUIZ VIEW -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-quiz" class="view">
+<div class="container">
+  <div class="quiz-setup" id="quiz-setup">
+    <div class="quiz-title">Knowledge Check</div>
+    <div class="quiz-subtitle">Select lecture(s) or take the full Lec 1–9 quiz</div>
+    <div class="quiz-lec-filter">
+      <button class="filter-btn active" onclick="setQuizFilter('all',this)">All (Lec 1–9)</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec1',this)">Lec 1</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec2',this)">Lec 2</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec3',this)">Lec 3</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec4',this)">Lec 4</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec5',this)">Lec 5</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec6',this)">Lec 6</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec7',this)">Lec 7</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec8',this)">Lec 8</button>
+      <button class="filter-btn" onclick="setQuizFilter('lec9',this)">Lec 9</button>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+  <div class="quiz-question-block" id="quiz-block">
+    <div class="quiz-q-num" id="q-num"></div>
+    <div class="quiz-q" id="q-text"></div>
+    <div class="quiz-options" id="q-options"></div>
+    <div class="quiz-explanation" id="q-explanation"></div>
+    <button class="quiz-next-btn" id="q-next" onclick="nextQuestion()">Next Question →</button>
+  </div>
+  <div class="quiz-result" id="quiz-result">
+    <div class="score-big" id="score-big"></div>
+    <div class="score-label" id="score-label"></div>
+    <button class="start-btn" onclick="restartQuiz()">Try Again</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- CHEAT SHEET VIEW -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="view-cheatsheet" class="view">
+<div class="container">
+  <div class="section-label" style="margin-top:0">Lec 1–3 · Core Concepts</div>
+  <div class="cheatsheet">
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot"></span>SDLC Phases</div><div class="cs-body"><strong>5 Phases (cyclical):</strong><ul><li>Maintenance</li><li>Requirements</li><li>Design</li><li>Implementation</li><li>Verification</li></ul></div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot purple"></span>INVEST (User Stories)</div><div class="cs-body"><strong>I</strong>ndependent · self-contained<br><strong>N</strong>egotiable · define what, not how<br><strong>V</strong>aluable · from product owner<br><strong>E</strong>stimable · can be sized S/M/L/XL<br><strong>S</strong>mall · short to code/read<br><strong>T</strong>estable · criteria cover all scenarios</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot green"></span>Gherkin Acceptance Criteria</div><div class="cs-body"><strong>Given</strong> — preconditions / setup<br><strong>When</strong> — the action or event<br><strong>Then</strong> — the expected outcome<br><br>Makes criteria unambiguous and testable.</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot orange"></span>Waterfall vs Agile</div><div class="cs-body"><div class="vs-row"><div class="vs-col"><div class="vs-col-title gold">Waterfall</div><ul><li>Linear / sequential</li><li>Stable requirements</li><li>Strong documentation</li><li>Phases fully complete</li></ul></div><div class="vs-col"><div class="vs-col-title purple">Agile</div><ul><li>Iterative cycles</li><li>Flexible to change</li><li>Customer collab.</li><li>Working software first</li></ul></div></div></div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot"></span>SCRUM Reference</div><div class="cs-body"><strong>Roles:</strong> Product Owner · Scrum Master · Dev Team<br><strong>Artifacts:</strong> Product Backlog · Sprint Backlog · Increment<br><strong>Events:</strong> Sprint · Refinement · Daily Scrum · Review · Retro</div></div>
+  </div>
+
+  <div class="section-label">Lec 4 · UML Class Diagrams</div>
+  <div class="cheatsheet">
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot"></span>Scope Symbols</div><div class="cs-body"><code>+</code> Public<br><code>#</code> Protected<br><code>(none)</code> Default / Package<br><code>−</code> Private<br><br><strong>Method:</strong> +name(param: Type): ReturnType</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot purple"></span>Connector Types</div><div class="cs-body"><strong>→ Association</strong> — communicates with, exists independently<br><strong>◇ Aggregation</strong> — logically part of, parts can be shared<br><strong>◆ Composition</strong> — physically part of, parts belong to one<br><strong>▷ Generalization</strong> — inheritance (is-a)<br><strong>--▷ Realization</strong> — implements interface</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot green"></span>Multiplicity</div><div class="cs-body"><code>*</code> zero to many<br><code>1..*</code> one to many (at least one)<br><code>0..1</code> zero or one (optional)<br><code>1</code> exactly one<br><code>2</code> exactly two<br><br><strong>Stereotype:</strong> &lt;&lt;Interface&gt;&gt; &lt;&lt;Property&gt;&gt;</div></div>
+  </div>
+
+  <div class="section-label">Lec 5–7 · Python</div>
+  <div class="cheatsheet">
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot"></span>Data Types Quick Ref</div><div class="cs-body"><code>int, float, complex</code> — Numeric<br><code>bool</code> — True / False<br><code>str</code> — String (immutable)<br><code>list</code> — ordered, mutable [ ]<br><code>tuple</code> — ordered, immutable ( )<br><code>set</code> — unordered, unique values { }<br><code>dict</code> — key:value pairs { }</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot purple"></span>Class Syntax</div><div class="cs-body"><code>class Name:<br>&nbsp;&nbsp;def __init__(self, a):<br>&nbsp;&nbsp;&nbsp;&nbsp;self.a = a<br>&nbsp;&nbsp;def __str__(self):<br>&nbsp;&nbsp;&nbsp;&nbsp;return str(self.a)</code><br><br><strong>__init__</strong> = constructor (auto-called on create)<br><strong>__str__</strong> = string rep (auto-called on print)</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot green"></span>Inheritance &amp; ABC</div><div class="cs-body"><code>class Child(Parent):</code> — inherits everything<br><code>class Animal(ABC):</code> — abstract class<br><code>@abstractmethod</code> — must be implemented<br><br><strong>TypeError</strong> if subclass skips abstract method<br><br><code>from abc import ABC, abstractmethod</code></div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot orange"></span>Error Handling</div><div class="cs-body"><code>try:</code> — may raise exception<br><code>except TypeError:</code> — handle specific type<br><code>except Exception as e:</code> — catch all<br><code>finally:</code> — always runs<br><br>Use specific exception types when possible.</div></div>
+  </div>
+
+  <div class="section-label">Lec 8 · Design &amp; Database</div>
+  <div class="cheatsheet">
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot"></span>Cohesion vs Coupling</div><div class="cs-body"><div class="vs-row"><div class="vs-col"><div class="vs-col-title gold">Cohesion</div><ul><li>Inside one module</li><li>One purpose</li><li><strong>HIGH</strong> = good</li></ul></div><div class="vs-col"><div class="vs-col-title purple">Coupling</div><ul><li>Between modules</li><li>Dependencies</li><li><strong>LOW</strong> = good</li></ul></div></div></div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot green"></span>DB Key Terminology</div><div class="cs-body"><code>table</code> — named collection of rows<br><code>row / record</code> — one data entry<br><code>column / field</code> — one attribute<br><code>PK</code> — primary key, uniquely identifies row<br><code>FK</code> — foreign key, references another table's PK<br><code>null</code> — absent / not yet assigned</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot orange"></span>Relationships &amp; ORM</div><div class="cs-body"><strong>One-to-Many:</strong> FK on the "many" side<br><strong>Many-to-Many:</strong> requires junction table (own PK + 2 FKs)<br><br><strong>ORM:</strong> code-based DB access (no raw SQL)<br>Django ORM (Python) · SQLAlchemy (Python) · Hibernate (Java)</div></div>
+  </div>
+
+  <div class="section-label">Lec 9 · HTML &amp; CSS</div>
+  <div class="cheatsheet">
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot"></span>HTML Common Tags</div><div class="cs-body"><code>&lt;h1&gt;–&lt;h6&gt;</code> Headings<br><code>&lt;p&gt;</code> Paragraph<br><code>&lt;a href="URL"&gt;</code> Hyperlink<br><code>&lt;img src="" alt=""&gt;</code> Image<br><code>&lt;ul&gt;/&lt;ol&gt;/&lt;li&gt;</code> Lists<br><code>&lt;table&gt;/&lt;tr&gt;/&lt;td&gt;</code> Tables<br><code>&lt;div&gt;</code> Division / container<br><code>&lt;form&gt;</code> Input form</div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot purple"></span>CSS Selectors</div><div class="cs-body"><code>p { }</code> — element selector<br><code>.myClass { }</code> — class selector<br><code>#myId { }</code> — ID selector (unique)<br><code>h1, h2 { }</code> — grouping selector<br><br><strong>Syntax:</strong><br><code>selector { property: value; }</code></div></div>
+    <div class="cs-card"><div class="cs-header"><span class="cs-dot green"></span>3 Types of CSS</div><div class="cs-body"><strong>Inline</strong> — in the style attribute of any element<br><code>&lt;p style="color:blue;"&gt;</code><br><br><strong>Internal</strong> — in a &lt;style&gt; block inside &lt;head&gt;<br><br><strong>External</strong> — separate .css file<br><code>&lt;link rel="stylesheet" href="styles.css"&gt;</code></div></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// VIEW SWITCHING
+// ══════════════════════════════════════════════════
+function switchView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'flashcards') renderCard();
+}
+
+// ══════════════════════════════════════════════════
+// OVERVIEW LECTURE SELECTOR
+// ══════════════════════════════════════════════════
+function showLec(id, btn) {
+  document.querySelectorAll('.lec-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.lec-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+// FLASHCARD DATA
+// ══════════════════════════════════════════════════
+const ALL_CARDS = [
+  // LEC 1
+  { lec: 'lec1', category: 'Lec 1 · SE Intro', q: 'What is Software Engineering?', hint: 'Disciplined approach...', a: '<strong>A disciplined approach</strong> for the development and maintenance of computer software, using engineering principles to design, build, test, and maintain software systems. Goal: high-quality, efficient, user-focused software within time and cost constraints.' },
+  { lec: 'lec1', category: 'Lec 1 · SE Intro', q: 'What are the 5 phases of the SDLC?', hint: 'Think cyclical...', a: '<strong>1. Maintenance → 2. Requirements → 3. Design → 4. Implementation → 5. Verification</strong><br>These phases are cyclical — each feeds into the next, forming a continuous loop.' },
+  { lec: 'lec1', category: 'Lec 1 · SE Intro', q: 'What is a User Story and what is its format?', hint: 'As a user...', a: 'A <strong>short, simple description</strong> of a feature from the user\'s perspective.<br>Format: <strong>"As a [user], I want [goal] so that [reason]."</strong><br>Focuses on value delivered, not technical details.' },
+  { lec: 'lec1', category: 'Lec 1 · SE Intro', q: 'What is the Gherkin format for Acceptance Criteria?', hint: 'Given/When/Then', a: '<strong>Given</strong> — setup/preconditions<br><strong>When</strong> — the action or event<br><strong>Then</strong> — expected result/outcome<br>Structured format makes criteria unambiguous and testable.' },
+  { lec: 'lec1', category: 'Lec 1 · SE Intro', q: 'Name the 3 core practices in Software Engineering.', hint: 'Iterate, test, track...', a: '<strong>1. Iterative development</strong> — build in repeated cycles<br><strong>2. Automated testing</strong> — verify quality continuously<br><strong>3. Version control</strong> — track and manage changes' },
+  // LEC 2
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What is a Functional Requirement?', hint: 'What the software does...', a: 'Describes <strong>what the software does</strong> — observable behavior, features, and functions. Test results are <strong>reproducible</strong>.<br>Example: "The system shall allow users to log in with username and password."' },
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What is a Non-Functional Requirement?', hint: 'How well the software works...', a: 'Measures <strong>how well the software works</strong> — quality attributes like performance, security, scalability. Covers time, memory, load, bandwidth limits. Results may <strong>not be perfectly reproducible</strong>.' },
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What does INVEST stand for?', hint: 'Quality checklist for user stories...', a: '<strong>I</strong>ndependent<br><strong>N</strong>egotiable<br><strong>V</strong>aluable<br><strong>E</strong>stimable<br><strong>S</strong>mall<br><strong>T</strong>estable<br>A checklist for writing high-quality user stories.' },
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What does "Negotiable" mean in INVEST?', hint: "Don't design with requirements...", a: 'Requirements should <strong>not design the solution</strong> — they define what is needed, not how. Implementation details are negotiable between team and stakeholders.' },
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What does "Estimable" mean in INVEST?', hint: 'Sizing the story...', a: 'You should be able to put a <strong>rough size estimate</strong> on the story (S, M, L, XL). If you can\'t estimate it, you don\'t understand it well enough.' },
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What are the 10 Requirement Elicitation Techniques?', hint: 'Brainstorming, interviews...', a: 'Brainstorming, Document Analysis, Focus Groups, Interface Analysis, Interviews, Observation, Process Modeling, Prototyping, Requirement Workshops, Surveys/Questionnaires' },
+  { lec: 'lec2', category: 'Lec 2 · Requirements', q: 'What is the difference between a User Story and Acceptance Criteria?', hint: 'What vs how to verify...', a: 'A <strong>user story</strong> describes the feature from the user\'s perspective (the \'what\' and \'why\').<br><strong>Acceptance criteria</strong> define the exact conditions to consider the story done (the \'how to verify\').' },
+  // LEC 3
+  { lec: 'lec3', category: 'Lec 3 · Methodologies', q: 'Describe the Waterfall model.', hint: 'Linear, sequential...', a: 'A <strong>linear, sequential</strong> methodology: Requirements → Design → Implementation → Verification → Maintenance. Each phase must be <strong>fully complete</strong> before the next begins.' },
+  { lec: 'lec3', category: 'Lec 3 · Methodologies', q: 'When should you use Waterfall?', hint: 'Stable requirements...', a: 'When: requirements are <strong>well-known and stable</strong>, the product definition won\'t change, software is tied to hardware (medical/autopilot), new version of existing product, or a <strong>small project</strong>.' },
+  { lec: 'lec3', category: 'Lec 3 · Methodologies', q: 'What are the 4 values of the Agile Manifesto?', hint: '2001, 17 developers...', a: '<strong>1.</strong> Individuals & Interactions over Processes & Tools<br><strong>2.</strong> Working Software over Comprehensive Documentation<br><strong>3.</strong> Customer Collaboration over Contract Negotiation<br><strong>4.</strong> Responding to Change over Following a Plan' },
+  { lec: 'lec3', category: 'Lec 3 · Methodologies', q: 'What are the 3 roles in SCRUM?', hint: 'Owner, master, team...', a: '<strong>1. Product Owner</strong> — represents stakeholders, owns product backlog<br><strong>2. Scrum Master</strong> — facilitates the process, removes blockers<br><strong>3. Development Team</strong> — self-organizing team that builds the product' },
+  { lec: 'lec3', category: 'Lec 3 · Methodologies', q: 'What are the 5 SCRUM Events?', hint: 'Sprint, daily standup...', a: '<strong>1. Sprint</strong> — main iteration (1–4 weeks)<br><strong>2. Backlog Refinement</strong> — review/clarify backlog<br><strong>3. Daily Scrum</strong> — short standup<br><strong>4. Sprint Review</strong> — demo to stakeholders<br><strong>5. Sprint Retrospective</strong> — team improves' },
+  { lec: 'lec3', category: 'Lec 3 · Methodologies', q: 'What are the 3 SCRUM Artifacts?', hint: 'Backlogs and increment...', a: '<strong>1. Product Backlog</strong> — prioritized list of all required tasks<br><strong>2. Sprint Backlog</strong> — goals and tasks for current sprint<br><strong>3. Product Increment</strong> — most recent working version of the product' },
+  // LEC 4
+  { lec: 'lec4', category: 'Lec 4 · UML', q: 'What are the two major categories of UML diagram types?', hint: 'Static vs dynamic...', a: '<strong>Structural Diagrams</strong> — show static structure (e.g., Class, Component, Object Diagrams) — used in LLD.<br><strong>Behavioral Diagrams</strong> — show dynamic behavior (e.g., State Machine, Use Case, Sequence) — used in HLD.' },
+  { lec: 'lec4', category: 'Lec 4 · UML', q: 'What are the 4 UML scope symbols?', hint: '+ # - and none...', a: '<strong>+</strong> = Public<br><strong>#</strong> = Protected<br><strong>(none)</strong> = Default / Package<br><strong>−</strong> = Private' },
+  { lec: 'lec4', category: 'Lec 4 · UML', q: 'What is the difference between Aggregation and Composition?', hint: 'Can parts exist independently?', a: '<strong>Aggregation (◇)</strong> — logically part of; parts can <em>exist independently</em> and be shared.<br><strong>Composition (◆)</strong> — physically part of; parts belong to <em>only one composite</em> and are typically deleted with it.' },
+  { lec: 'lec4', category: 'Lec 4 · UML', q: 'What does Realization look like in UML and what does it represent?', hint: 'Dashed line with triangle...', a: 'A <strong>dashed line with a hollow triangle (--▷)</strong> pointing to the interface. Represents a class implementing an interface contract.<br>Example: Vehicle --▷ &lt;&lt;Interface&gt;&gt; Drivable' },
+  { lec: 'lec4', category: 'Lec 4 · UML', q: 'What do these multiplicities mean: *, 1..*, 0..1, 2?', hint: 'Zero to many...', a: '<strong>*</strong> = zero to many<br><strong>1..*</strong> = one to many (at least one)<br><strong>0..1</strong> = zero or one (optional)<br><strong>2</strong> = exactly two' },
+  // LEC 5
+  { lec: 'lec5', category: 'Lec 5 · Python', q: "What are Python's 5 main data type categories?", hint: 'Numeric, Boolean, Sequence...', a: '<strong>Numeric</strong> — int, float, complex<br><strong>Boolean</strong> — bool (True, False)<br><strong>Sequence</strong> — str, list, tuple<br><strong>Set</strong> — set, frozenset<br><strong>Mapping</strong> — dict' },
+  { lec: 'lec5', category: 'Lec 5 · Python', q: 'What is the key difference between a List and a Tuple?', hint: 'Mutable vs immutable...', a: '<strong>List [ ]</strong> — mutable; elements can be changed after creation.<br><strong>Tuple ( )</strong> — immutable; elements cannot be changed.<br>Both are ordered sequences accessible by index.' },
+  { lec: 'lec5', category: 'Lec 5 · Python', q: 'What are the three parameters of range() and what does each mean?', hint: 'Start, stop, step...', a: '<strong>range(start, stop, step)</strong><br><strong>start</strong> — beginning value (optional, default 0)<br><strong>stop</strong> — ending value (exclusive, required)<br><strong>step</strong> — increment (optional, default 1)' },
+  { lec: 'lec5', category: 'Lec 5 · Python', q: 'What does negative indexing do in Python?', hint: '-1 = last element...', a: 'Negative indices count from the <strong>end</strong> of the sequence.<br><strong>-1</strong> = last element, <strong>-2</strong> = second-to-last, etc.' },
+  { lec: 'lec5', category: 'Lec 5 · Python', q: 'What do the dictionary methods keys(), values(), items(), get(), pop() do?', hint: 'Access and modify dict...', a: '<strong>keys()</strong> — all keys · <strong>values()</strong> — all values · <strong>items()</strong> — all key-value pairs · <strong>get(key)</strong> — safe retrieval (None if missing) · <strong>pop(key)</strong> — remove and return value' },
+  // LEC 6
+  { lec: 'lec6', category: 'Lec 6 · OOP', q: 'What is the difference between a class and an object?', hint: 'Blueprint vs instance...', a: 'A <strong>class</strong> is a blueprint or template for creating objects.<br>An <strong>object</strong> is an instance of a class — a specific realization with its own attribute values.' },
+  { lec: 'lec6', category: 'Lec 6 · OOP', q: 'What are the 4 main benefits of OOP?', hint: 'ERIA...', a: '<strong>Encapsulation</strong> — group related data and methods<br><strong>Reusability</strong> — many objects from one blueprint<br><strong>Abstraction</strong> — hide complex implementation<br><strong>Inheritance</strong> — inherit from existing classes' },
+  { lec: 'lec6', category: 'Lec 6 · OOP', q: 'What is __init__ and when is it called?', hint: 'Constructor...', a: '__init__ is the <strong>constructor method</strong>. Called <strong>automatically when an object is created</strong>. Initializes instance variables using self.<br>Example: p = Person(\'Alice\', 25) calls __init__ automatically.' },
+  { lec: 'lec6', category: 'Lec 6 · OOP', q: 'What does "self" refer to in a Python class method?', hint: 'Current instance...', a: '<strong>self</strong> refers to the current instance of the class. First parameter of every instance method — automatically passed when calling a method on an object.' },
+  { lec: 'lec6', category: 'Lec 6 · OOP', q: 'What are the three blocks of try-except-finally?', hint: 'Error handling pattern...', a: '<strong>try:</strong> code that may raise an exception<br><strong>except ExceptionType:</strong> handles the exception<br><strong>finally:</strong> always runs regardless of whether exception occurred' },
+  // LEC 7
+  { lec: 'lec7', category: 'Lec 7 · Inheritance', q: 'What is inheritance and what is its syntax in Python?', hint: 'class Child(Parent)...', a: 'Allows a <strong>child class to inherit attributes and methods from a parent class</strong>.<br>Syntax: <strong>class ChildClass(ParentClass):</strong><br>The child gets all parent methods automatically.' },
+  { lec: 'lec7', category: 'Lec 7 · Inheritance', q: 'What is an interface and how does Python implement it?', hint: 'ABC module...', a: 'An interface <strong>defines a contract for classes without specifying implementation</strong>.<br>Python uses <strong>Abstract Base Classes (ABCs)</strong>:<br><code>from abc import ABC, abstractmethod</code>' },
+  { lec: 'lec7', category: 'Lec 7 · Inheritance', q: 'What happens if a subclass does NOT implement an @abstractmethod?', hint: 'TypeError...', a: 'Python raises a <strong>TypeError</strong> when you try to instantiate the subclass. Abstract methods act as a contract — all subclasses MUST provide implementations.' },
+  { lec: 'lec7', category: 'Lec 7 · Inheritance', q: 'What is the UML representation of inheritance vs. interface implementation?', hint: 'Solid vs dashed line with triangle...', a: '<strong>Inheritance (Generalization)</strong> — solid line with hollow triangle (▷) pointing to parent.<br><strong>Interface (Realization)</strong> — dashed line with hollow triangle (--▷) pointing to interface.' },
+  // LEC 8
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'What is cohesion and what level is desirable?', hint: 'Module focus...', a: '<strong>Cohesion</strong> measures how closely related and focused the responsibilities of a module are.<br>A cohesive module has <strong>one purpose</strong> with a uniform interface.<br><strong>High cohesion is desirable.</strong>' },
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'What is coupling and what level is desirable?', hint: 'Between-module dependency...', a: '<strong>Coupling</strong> measures how dependent one module/class is on another.<br><strong>Low coupling is desirable</strong> — allows modules to change independently without cascading effects.' },
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'What is a Primary Key (PK)?', hint: 'Unique identifier per row...', a: 'A <strong>Primary Key (PK)</strong> uniquely identifies each row within a table. Attempting to duplicate causes an <strong>exception</strong>.' },
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'What is a Foreign Key (FK)?', hint: 'References another table...', a: 'A <strong>Foreign Key (FK)</strong> is a column that stores the <strong>primary key of a row in a different table</strong>, linking tables together.' },
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'How does a junction table solve the Many-to-Many problem?', hint: 'labToStudent table...', a: 'A <strong>junction table</strong> has its own PK and two FK columns — one pointing to each table.<br>Each row represents one relationship pair, breaking M:M into two 1:M relationships.' },
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'What is an ORM and what problem does it solve?', hint: 'Code instead of SQL...', a: '<strong>ORM = Object-Relational Mapping</strong> — allows developers to interact with a database using <strong>code objects</strong> instead of raw SQL.<br>Examples: Django ORM (Python), SQLAlchemy (Python), Hibernate (Java).' },
+  { lec: 'lec8', category: 'Lec 8 · Database', q: 'In an abstraction hierarchy, what does moving "up" mean?', hint: 'automobile → car → sports car...', a: 'Moving <strong>up</strong> = becoming more <strong>abstract</strong> (general). Moving <strong>down</strong> = more <strong>refined</strong> (specific).<br>Example: "car is a <em>refinement</em> of automobile" (down). "sports car is an <em>abstraction</em> of Chevy Corvette" (up).' },
+  // LEC 9
+  { lec: 'lec9', category: 'Lec 9 · HTML/CSS', q: 'What is the basic structure of an HTML page?', hint: 'html > head + body...', a: '<code>&lt;html&gt;</code> — root element<br><code>&lt;head&gt;</code> — meta-information, not displayed (title, links, scripts)<br><code>&lt;body&gt;</code> — visible page content<br><br>HTML is structured as a <strong>Document Tree (DOM)</strong>.' },
+  { lec: 'lec9', category: 'Lec 9 · HTML/CSS', q: 'What is CSS and what does it control?', hint: 'Cascading Style Sheets...', a: '<strong>CSS = Cascading Style Sheets</strong> — used to style and layout web pages.<br>Controls: <strong>colors, fonts, spacing, positioning, animations</strong> and more.' },
+  { lec: 'lec9', category: 'Lec 9 · HTML/CSS', q: 'What are the 3 types of CSS?', hint: 'Inline, internal, external...', a: '<strong>Inline CSS</strong> — style attribute on element: <code>&lt;p style="color:blue;"&gt;</code><br><strong>Internal CSS</strong> — &lt;style&gt; block in &lt;head&gt;<br><strong>External CSS</strong> — separate file: <code>&lt;link rel="stylesheet" href="styles.css"&gt;</code>' },
+  { lec: 'lec9', category: 'Lec 9 · HTML/CSS', q: 'What are the 4 CSS selector types?', hint: 'Element, class, ID, grouping...', a: '<strong>Element:</strong> <code>p { }</code> — targets all &lt;p&gt;<br><strong>Class:</strong> <code>.myClass { }</code> — targets class="myClass"<br><strong>ID:</strong> <code>#myId { }</code> — targets id="myId" (unique)<br><strong>Grouping:</strong> <code>h1, h2 { }</code> — multiple elements' },
+  { lec: 'lec9', category: 'Lec 9 · HTML/CSS', q: 'What is the basic CSS syntax?', hint: 'selector { property: value; }', a: '<strong>selector { property: value; }</strong><br><br>Example:<br><code>h1, h2 {<br>&nbsp;&nbsp;color: yellow;<br>&nbsp;&nbsp;background-color: blue;<br>}</code>' },
+  { lec: 'lec9', category: 'Lec 9 · HTML/CSS', q: 'Name 5 common HTML elements and what they do.', hint: 'Tags and their purposes...', a: '<strong>&lt;h1&gt;–&lt;h6&gt;</strong> — Headings (largest to smallest)<br><strong>&lt;p&gt;</strong> — Paragraph<br><strong>&lt;a href=""&gt;</strong> — Hyperlink<br><strong>&lt;img src="" alt=""&gt;</strong> — Image<br><strong>&lt;ul&gt;/&lt;li&gt;</strong> — Unordered list' },
+];
+
+let currentCards = [...ALL_CARDS];
+let cardIndex = 0;
+let isFlipped = false;
+
+function filterCards(lec, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCards = lec === 'all' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.lec === lec);
+  cardIndex = 0; isFlipped = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+  renderCard();
+}
+
+function renderCard() {
+  if (!currentCards.length) return;
+  const c = currentCards[cardIndex];
+  document.getElementById('fc-category').textContent = c.category;
+  document.getElementById('fc-question').textContent = c.q;
+  document.getElementById('fc-hint').textContent = c.hint ? '💡 ' + c.hint : '';
+  document.getElementById('fc-answer').innerHTML = c.a;
+  document.getElementById('fc-cur').textContent = cardIndex + 1;
+  document.getElementById('fc-total').textContent = currentCards.length;
+  document.getElementById('fc-progress').style.width = ((cardIndex + 1) / currentCards.length * 100) + '%';
+}
+
+function flipCard() { isFlipped = !isFlipped; document.getElementById('card-inner').classList.toggle('flipped', isFlipped); }
+function nextCard() { cardIndex = (cardIndex + 1) % currentCards.length; isFlipped = false; document.getElementById('card-inner').classList.remove('flipped'); renderCard(); }
+function prevCard() { cardIndex = (cardIndex - 1 + currentCards.length) % currentCards.length; isFlipped = false; document.getElementById('card-inner').classList.remove('flipped'); renderCard(); }
+function shuffleCards() { for (let i = currentCards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]]; } cardIndex = 0; isFlipped = false; document.getElementById('card-inner').classList.remove('flipped'); renderCard(); }
+
+// ══════════════════════════════════════════════════
+// QUIZ DATA
+// ══════════════════════════════════════════════════
+const QUIZ_QUESTIONS = [
+  // LEC 1
+  { lec: 'lec1', q: 'What does SDLC stand for?', options: ['Software Design and Layout Cycle','Software Development Life Cycle','Systematic Design and Logic Control','Software Delivery and Launch Cycle'], answer: 1, explanation: '<strong>Software Development Life Cycle</strong> — a structured process for planning, creating, testing, and deploying software through 5 cyclical phases.' },
+  { lec: 'lec1', q: 'In the Gherkin format for acceptance criteria, what does "Then" represent?', options: ['The preconditions','The feature being tested','The expected result or outcome','The user performing the action'], answer: 2, explanation: '<strong>Then</strong> describes the <strong>expected result</strong>. Given = setup, When = action, Then = outcome.' },
+  { lec: 'lec1', q: 'What is the correct format for a User Story?', options: ['"The system shall allow [feature]"', '"As a [user], I want [goal] so that [reason]."','"[Feature] must be completed by [date]."','"User needs [feature] because [reason]."'], answer: 1, explanation: 'User stories follow the format: <strong>"As a [user], I want [goal] so that [reason]."</strong> This keeps focus on value from the user\'s perspective.' },
+  // LEC 2
+  { lec: 'lec2', q: 'Which of the following is a Non-Functional Requirement?', options: ['Users can register an account','System displays a confirmation message','Page must load in under 2 seconds','Admin can delete user accounts'], answer: 2, explanation: '<strong>Non-Functional Requirements</strong> describe HOW WELL the system works — performance, speed, scalability. "Load in under 2 seconds" is a performance (non-functional) requirement.' },
+  { lec: 'lec2', q: 'What does the "S" in INVEST stand for?', options: ['Specific','Scalable','Small','Structured'], answer: 2, explanation: '<strong>Small</strong> — the story shouldn\'t take long to code or read. Break large stories (epics) into smaller ones. Small stories are easier to estimate, test, and ship.' },
+  { lec: 'lec2', q: 'What does "Negotiable" mean in the INVEST criteria?', options: ['The story can be removed from the backlog','Requirements should define what, not how','The story can be assigned to any developer','Acceptance criteria can change anytime'], answer: 1, explanation: '<strong>Negotiable</strong> means requirements should <strong>not design the solution</strong>. They define what is needed (not the how). Implementation is negotiated between team and stakeholders.' },
+  // LEC 3
+  { lec: 'lec3', q: 'Which Agile framework uses Sprints, a Product Owner, and a Scrum Master?', options: ['Kanban','Waterfall','Scrum','Extreme Programming (XP)'], answer: 2, explanation: '<strong>Scrum</strong> uses Sprints (1–4 week iterations), a Product Owner (owns the backlog), a Scrum Master (facilitator), and a Development Team.' },
+  { lec: 'lec3', q: 'In Agile, which is valued OVER "Comprehensive Documentation"?', options: ['Customer Collaboration','Responding to Change','Individuals and Interactions','Working Software'], answer: 3, explanation: 'The Agile Manifesto values <strong>Working Software over Comprehensive Documentation</strong>. Delivering functional software is prioritized over extensive docs.' },
+  { lec: 'lec3', q: 'What percentage of sprint time does Backlog Grooming typically take?', options: ['1-2%','5-10%','15-20%','25-30%'], answer: 1, explanation: 'Backlog Grooming (Refinement) takes approximately <strong>5-10%</strong> of the total sprint time.' },
+  // LEC 4
+  { lec: 'lec4', q: 'What UML connector represents a "physically part of" relationship where parts cannot exist independently?', options: ['Association (→)','Aggregation (◇)','Composition (◆)','Generalization (▷)'], answer: 2, explanation: '<strong>Composition (◆)</strong> — physically part of. Parts belong to only ONE composite and are typically deleted with it. Aggregation (◇) allows parts to exist independently.' },
+  { lec: 'lec4', q: 'What does the UML scope symbol "#" indicate?', options: ['Public','Private','Protected','Default/Package'], answer: 2, explanation: '<strong>#</strong> = Protected scope. + = Public, - = Private, (none) = Default/Package.' },
+  { lec: 'lec4', q: 'What multiplicity means "one to many (at least one)"?', options: ['*','1','0..1','1..*'], answer: 3, explanation: '<strong>1..*</strong> means one to many — at least one required. <code>*</code> means zero to many. <code>0..1</code> means zero or one (optional).' },
+  // LEC 5
+  { lec: 'lec5', q: 'Which Python data type is immutable and ordered?', options: ['list','dict','set','tuple'], answer: 3, explanation: '<strong>Tuple ( )</strong> is ordered and <strong>immutable</strong> — elements cannot be changed. A list is mutable. A set is unordered. A dict is unordered.' },
+  { lec: 'lec5', q: 'In range(2, 10, 3), what values are generated?', options: ['2, 5, 8, 11','2, 5, 8','3, 6, 9','2, 4, 6, 8, 10'], answer: 1, explanation: '<strong>range(start=2, stop=10, step=3)</strong> → 2, 5, 8. Stop (10) is exclusive. After 8, the next would be 11 which exceeds 10, so we stop at 8.' },
+  { lec: 'lec5', q: 'What does dict.get("key") return if the key does not exist?', options: ['0','An empty string','None','KeyError exception'], answer: 2, explanation: '<strong>get()</strong> is the safe way to retrieve from a dict. If the key doesn\'t exist, it returns <strong>None</strong> (not an exception). Use get(key, default) to return a custom default value.' },
+  // LEC 6
+  { lec: 'lec6', q: 'When is __init__ automatically called in Python?', options: ['When the class is defined','When a method is called on an object','When an object is created (instantiated)','When the module is imported'], answer: 2, explanation: '<strong>__init__</strong> (the constructor) is called automatically <strong>when an object is created</strong>: <code>obj = MyClass(args)</code> triggers __init__ immediately.' },
+  { lec: 'lec6', q: 'What does "self" refer to in a Python method?', options: ['The class itself','The current module','The current instance of the class','The parent class'], answer: 2, explanation: '<strong>self</strong> refers to the <strong>current instance</strong> of the class. It must be the first parameter of every instance method and is automatically passed when calling obj.method().' },
+  { lec: 'lec6', q: 'Which OOP concept means "hiding complex implementation details"?', options: ['Encapsulation','Abstraction','Inheritance','Polymorphism'], answer: 1, explanation: '<strong>Abstraction</strong> = hiding complex implementation details. Encapsulation = grouping related data and methods. Inheritance = inheriting from a parent class.' },
+  // LEC 7
+  { lec: 'lec7', q: 'What error is raised if a class inherits from ABC but does NOT implement an abstract method?', options: ['ValueError','AttributeError','TypeError','NotImplementedError'], answer: 2, explanation: 'Python raises a <strong>TypeError</strong> when you try to instantiate a subclass that has not implemented all @abstractmethod methods from its ABC parent.' },
+  { lec: 'lec7', q: 'What module must be imported to use Abstract Base Classes in Python?', options: ['abstract','interface','abc','base'], answer: 2, explanation: '<strong>from abc import ABC, abstractmethod</strong> — The abc module provides the ABC class and @abstractmethod decorator for creating interface-like contracts.' },
+  { lec: 'lec7', q: 'In UML, what does a dashed line with a hollow triangle (--▷) represent?', options: ['Aggregation','Inheritance/Generalization','Realization (implements interface)','Association'], answer: 2, explanation: '<strong>Realization (--▷)</strong> = dashed line with hollow triangle = a class implementing an interface. Generalization (▷) = solid line with hollow triangle = inheritance.' },
+  // LEC 8
+  { lec: 'lec8', q: 'Which is the DESIRABLE combination for software design?', options: ['High coupling, low cohesion','Low cohesion, low coupling','High cohesion, low coupling','High coupling, high cohesion'], answer: 2, explanation: '<strong>High Cohesion + Low Coupling</strong> = the golden standard. High cohesion = each module does one thing well. Low coupling = modules are independent.' },
+  { lec: 'lec8', q: 'In a Many-to-One relationship, where does the Foreign Key column live?', options: ["On the 'one' side",'On both tables',"On the 'many' side",'In a separate junction table'], answer: 2, explanation: 'The FK lives on the <strong>"many" side</strong>. Example: many labs → one TA. The lab table has a ta_id FK column. The TA table does NOT store one column per lab.' },
+  { lec: 'lec8', q: 'What does ORM stand for?', options: ['Object-Relational Model','Object-Relational Mapping','Operational Relational Module','Open Resource Manager'], answer: 1, explanation: '<strong>Object-Relational Mapping</strong> — lets developers interact with a database using code objects instead of writing raw SQL queries.' },
+  // LEC 9
+  { lec: 'lec9', q: 'Which part of an HTML document is NOT displayed to users?', options: ['<body>','<div>','<head>','<main>'], answer: 2, explanation: 'The <strong>&lt;head&gt;</strong> contains meta-information (title, CSS links, scripts) that is not rendered on the page. Only &lt;body&gt; content is displayed.' },
+  { lec: 'lec9', q: 'Which CSS selector targets an element with id="main"?', options: ['.main { }','main { }','#main { }','*main { }'], answer: 2, explanation: '<strong>#main { }</strong> is the ID selector. IDs are unique per page. Classes use a dot (.className), element selectors use the tag name (p, div, h1), grouping uses commas.' },
+  { lec: 'lec9', q: 'Which type of CSS has the HIGHEST specificity?', options: ['External CSS','Internal CSS','Inline CSS','All are equal'], answer: 2, explanation: '<strong>Inline CSS</strong> has the highest specificity — it overrides internal and external styles. Inline is written directly on the element: <code>style="color: red;"</code>' },
+];
+
+let filteredQuiz = [...QUIZ_QUESTIONS];
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let activeQuizFilter = 'all';
+
+function setQuizFilter(lec, btn) {
+  document.querySelectorAll('.quiz-lec-filter .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeQuizFilter = lec;
+}
+
+function startQuiz() {
+  filteredQuiz = activeQuizFilter === 'all' ? [...QUIZ_QUESTIONS] : QUIZ_QUESTIONS.filter(q => q.lec === activeQuizFilter);
+  // shuffle
+  for (let i = filteredQuiz.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [filteredQuiz[i], filteredQuiz[j]] = [filteredQuiz[j], filteredQuiz[i]]; }
+  quizIndex = 0; quizScore = 0;
+  document.getElementById('quiz-setup').style.display = 'none';
+  document.getElementById('quiz-result').style.display = 'none';
+  document.getElementById('quiz-block').style.display = 'block';
+  document.getElementById('quiz-block').classList.add('active');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (quizIndex >= filteredQuiz.length) { showResult(); return; }
+  quizAnswered = false;
+  const q = filteredQuiz[quizIndex];
+  document.getElementById('q-num').textContent = `Question ${quizIndex + 1} of ${filteredQuiz.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-explanation').style.display = 'none';
+  document.getElementById('q-next').style.display = 'none';
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span>${opt}`;
+    btn.onclick = () => selectAnswer(i);
+    opts.appendChild(btn);
+  });
+}
+
+function selectAnswer(selected) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = filteredQuiz[quizIndex];
+  document.querySelectorAll('.quiz-option').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === selected) btn.classList.add('wrong');
+  });
+  if (selected === q.answer) quizScore++;
+  const exp = document.getElementById('q-explanation');
+  exp.innerHTML = q.explanation;
+  exp.style.display = 'block';
+  document.getElementById('q-next').style.display = 'inline-block';
+  quizIndex++;
+}
+
+function nextQuestion() { renderQuestion(); }
+
+function showResult() {
+  document.getElementById('quiz-block').style.display = 'none';
+  const result = document.getElementById('quiz-result');
+  result.style.display = 'block';
+  const pct = Math.round((quizScore / filteredQuiz.length) * 100);
+  document.getElementById('score-big').textContent = pct + '%';
+  let label = '';
+  if (pct >= 90) label = `${quizScore}/${filteredQuiz.length} correct — Excellent! You know this material well. 🎉`;
+  else if (pct >= 70) label = `${quizScore}/${filteredQuiz.length} correct — Good work, review a few areas.`;
+  else label = `${quizScore}/${filteredQuiz.length} correct — Keep studying! Use the flashcards.`;
+  document.getElementById('score-label').textContent = label;
+}
+
+function restartQuiz() {
+  document.getElementById('quiz-result').style.display = 'none';
+  document.getElementById('quiz-setup').style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const view = document.querySelector('.view.active');
+  if (!view || view.id !== 'view-flashcards') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextCard();
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevCard();
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+});
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+renderCard();
+
+// Keyboard hint
+const hint = document.createElement('div');
+hint.style.cssText = 'position:fixed;bottom:20px;right:20px;background:rgba(10,10,15,0.95);border:1px solid rgba(245,197,24,0.2);border-radius:8px;padding:10px 14px;font-family:"IBM Plex Mono",monospace;font-size:10px;color:#888899;letter-spacing:1px;z-index:200;line-height:1.8;pointer-events:none;';
+hint.innerHTML = '⌨ SPACE=flip &nbsp;·&nbsp; ←→=navigate';
+document.body.appendChild(hint);
+</script>
+</body>
+</html>
